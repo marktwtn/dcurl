@@ -77,7 +77,8 @@ OBJS = \
 	trinary.o \
 	dcurl.o \
 	implcontext.o \
-	common.o
+	common.o \
+	mempool.o
 
 ifeq ("$(BUILD_AVX)","1")
 OBJS += pow_avx.o
