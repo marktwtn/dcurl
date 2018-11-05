@@ -51,7 +51,6 @@ int main()
     dcurl_init();
     int8_t *ret_trytes = dcurl_entry((int8_t *) trytes, mwm);
     assert(ret_trytes);
-    dcurl_destroy();
 
     Trytes_t *trytes_t = initTrytes(ret_trytes, 2673);
     assert(trytes_t);
@@ -64,10 +63,11 @@ int main()
         assert(ret_trits->data[i] == 0);
     }
 
-    free(ret_trytes);
+    mempool_free(&pool, ret_trytes);
     freeTrobject(trytes_t);
     freeTrobject(hash_trytes);
     freeTrobject(ret_trits);
+    dcurl_destroy();
 
     return 0;
 }

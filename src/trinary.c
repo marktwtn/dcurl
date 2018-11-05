@@ -8,6 +8,7 @@
 #include "trinary.h"
 #include "constants.h"
 #include "curl.h"
+#include "mempool.h"
 
 static int8_t TrytesToTritsMappings[][3] = {
     {0, 0, 0},  {1, 0, 0},  {-1, 1, 0},   {0, 1, 0},   {1, 1, 0},   {-1, -1, 1},
@@ -20,8 +21,8 @@ void freeTrobject(Trobject_t *t)
 {
     if (t) {
         if (t->data)
-            free(t->data);
-        free(t);
+            mempool_free(&pool, t->data);
+        mempool_free(&pool, t);
     }
 }
 
@@ -52,13 +53,13 @@ Trobject_t *initTrits(int8_t *src, int len)
 {
     Trobject_t *trits = NULL;
 
-    trits = (Trobject_t *) malloc(sizeof(Trobject_t));
+    trits = (Trobject_t *) mempool_alloc(&pool, sizeof(Trobject_t));
     if (!trits)
         return NULL;
 
-    trits->data = (int8_t *) malloc(len + 1);
+    trits->data = (int8_t *) mempool_alloc(&pool, len + 1);
     if (!trits->data) {
-        free(trits);
+        mempool_free(&pool, trits);
         return NULL;
     }
 
@@ -83,14 +84,14 @@ Trobject_t *initTrytes(int8_t *src, int len)
 {
     Trobject_t *trytes = NULL;
 
-    trytes = (Trobject_t *) malloc(sizeof(Trobject_t));
+    trytes = (Trobject_t *) mempool_alloc(&pool, sizeof(Trobject_t));
     if (!trytes) {
         return NULL;
     }
 
-    trytes->data = (int8_t *) malloc(len + 1);
+    trytes->data = (int8_t *) mempool_alloc(&pool, len + 1);
     if (!trytes->data) {
-        free(trytes);
+        mempool_free(&pool, trytes);
         return NULL;
     }
 
@@ -123,7 +124,7 @@ Trobject_t *trytes_from_trits(Trobject_t *trits)
     }
 
     Trobject_t *trytes = NULL;
-    int8_t *src = (int8_t *) malloc(trits->len / 3);
+    int8_t *src = (int8_t *) mempool_alloc(&pool, trits->len / 3);
 
     /* Start converting */
     for (int i = 0; i < trits->len / 3; i++) {
@@ -136,7 +137,7 @@ Trobject_t *trytes_from_trits(Trobject_t *trits)
     }
 
     trytes = initTrytes(src, trits->len / 3);
-    free(src);
+    mempool_free(&pool, src);
 
     return trytes;
 }
@@ -152,7 +153,7 @@ Trobject_t *trits_from_trytes(Trobject_t *trytes)
     }
 
     Trobject_t *trits = NULL;
-    int8_t *src = (int8_t *) malloc(trytes->len * 3);
+    int8_t *src = (int8_t *) mempool_alloc(&pool, trytes->len * 3);
 
     /* Start converting */
     for (int i = 0; i < trytes->len; i++) {
@@ -163,7 +164,7 @@ Trobject_t *trits_from_trytes(Trobject_t *trytes)
     }
 
     trits = initTrits(src, trytes->len * 3);
-    free(src);
+    mempool_free(&pool, src);
 
     return trits;
 }

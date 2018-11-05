@@ -7,6 +7,7 @@ int main()
         "UG9OEOZPOTD";
     int length_test_case = 81;
 
+    mempool_init(&pool);
     Trytes_t *trytes =
         initTrytes((signed char *) trytes_test_case, length_test_case);
     assert(trytes);
@@ -20,6 +21,7 @@ int main()
     freeTrobject(trytes);
     freeTrobject(trits);
     freeTrobject(ret_trytes);
+    mempool_destroy(&pool);
 
     assert(ret != 0);
 

@@ -14,6 +14,7 @@
 #include "cpu-utils.h"
 #include "curl.h"
 #include "implcontext.h"
+#include "mempool.h"
 
 static const int indices[] = {
     0,   364, 728, 363, 727, 362, 726, 361, 725, 360, 724, 359, 723, 358, 722,
@@ -268,7 +269,7 @@ static int8_t *tx_to_cstate(Trytes_t *tx)
     int8_t tyt[TRANSACTION_TRYTES_LENGTH - HASH_TRYTES_LENGTH] = {0};
 
     Curl *c = initCurl();
-    int8_t *c_state = (int8_t *) malloc(STATE_TRITS_LENGTH);
+    int8_t *c_state = (int8_t *) mempool_alloc(&pool, STATE_TRITS_LENGTH);
     if (!c || !c_state) goto fail;
 
     /* Copy tx->data[:TRANSACTION_TRYTES_LENGTH - HASH_TRYTES_LENGTH] to tyt */
@@ -297,7 +298,7 @@ fail:
     freeTrobject(inn);
     freeTrobject(tr);
     freeCurl(c);
-    free(c_state);
+    mempool_free(&pool, c_state);
     return NULL;
 }
 
@@ -376,7 +377,7 @@ bool PowSSE(void *pow_ctx)
 
 fail:
     /* Free memory */
-    free(c_state);
+    mempool_free(&pool, c_state);
     freeTrobject(tx_tryte);
     freeTrobject(nonce_trit);
     freeTrobject(nonce_tryte);
@@ -388,6 +389,7 @@ static bool PoWSSE_Context_Initialize(ImplContext *impl_ctx)
     int nproc = get_avail_nprocs();
     if (impl_ctx->num_max_thread <= 0 || nproc <= 0) return false;
 
+    mempool_init(&pool);
     PoW_SSE_Context *ctx = (PoW_SSE_Context *) malloc(sizeof(PoW_SSE_Context) * impl_ctx->num_max_thread);
     if (!ctx) return false;
 
@@ -423,6 +425,7 @@ fail:
 
 static void PoWSSE_Context_Destroy(ImplContext *impl_ctx)
 {
+    mempool_destroy(&pool);
     PoW_SSE_Context *ctx = (PoW_SSE_Context *) impl_ctx->context;
     free(ctx[0].threads);
     free(ctx[0].pitem);
@@ -459,7 +462,7 @@ static bool PoWSSE_freePoWContext(ImplContext *impl_ctx, void *pow_ctx)
 
 static int8_t *PoWSSE_getPoWResult(void *pow_ctx)
 {
-    int8_t *ret = (int8_t *) malloc(sizeof(int8_t) * (TRANSACTION_TRYTES_LENGTH));
+    int8_t *ret = (int8_t *) mempool_alloc(&pool, sizeof(int8_t) * (TRANSACTION_TRYTES_LENGTH));
     if (!ret) return NULL;
     memcpy(ret, ((PoW_SSE_Context *) pow_ctx)->output_trytes, TRANSACTION_TRYTES_LENGTH);
     return ret;

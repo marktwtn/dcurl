@@ -162,7 +162,7 @@ int main()
                 assert(ret_trits->data[i] == 0);
             }
 
-            free(ret_trytes);
+            mempool_free(&pool, ret_trytes);
             freeTrobject(trytes_t);
             freeTrobject(hash_trytes);
             freeTrobject(ret_trits);

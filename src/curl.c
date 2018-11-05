@@ -8,6 +8,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include "mempool.h"
 
 static const int8_t truthTable[11] = {1, 0, -1, 2, 1, -1, 0, 2, -1, 1, 0};
 static const int indices__[] = {
@@ -120,7 +121,7 @@ Trytes_t *Squeeze(Curl *c)
 
 Curl *initCurl()
 {
-    Curl *c = (Curl *) malloc(sizeof(Curl));
+    Curl *c = (Curl *) mempool_alloc(&pool, sizeof(Curl));
     if (!c)
         return NULL;
 
@@ -134,6 +135,6 @@ void freeCurl(Curl *c)
 {
     if (c) {
         freeTrobject(c->state);
-        free(c);
+        mempool_free(&pool, c);
     }
 }

@@ -2,6 +2,7 @@
 #define TEST_COMMON_H
 
 #include "curl.h"
+#include "mempool.h"
 #include "trinary.h"
 
 /* FIXME: conditional inclusion of architecture-specific headers */

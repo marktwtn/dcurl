@@ -44,6 +44,7 @@ int main()
         "SYVDPCXX9LLAT";
     int length_test_case = 2673;
 
+    mempool_init(&pool);
     Trytes_t *answer = initTrytes((signed char *) "WPM9JCTQH9QHBHBJCODWDNPSLFLQDZADRAEZTZDL9OEGTVRZARVLVJHZIMPBPCTAIYJKWTUSRKNNTMFOQ", 81);
     assert(answer);
     Trytes_t *trytes =
@@ -57,6 +58,7 @@ int main()
     freeTrobject(answer);
     freeTrobject(trytes);
     freeTrobject(ret_trytes);
+    mempool_destroy(&pool);
 
     assert(ret != 0);
 
