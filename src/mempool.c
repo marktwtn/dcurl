@@ -1,5 +1,6 @@
 #include "mempool.h"
 
+#include <stdio.h>
 #include <stdlib.h>
 
 uint32_t block_sizes[MAX_BLOCK_INFO_ENTRY] = {
@@ -14,6 +15,18 @@ uint32_t block_sizes[MAX_BLOCK_INFO_ENTRY] = {
     BLOCK_SIZE_8,
     BLOCK_SIZE_9,
 };
+
+static inline uint64_t rdtsc(void)
+{
+    unsigned hi, lo;
+    __asm__ __volatile__("rdtsc" : "=a"(lo), "=d"(hi));
+    return ((uint64_t) lo) | (((uint64_t) hi) << 32);
+}
+
+#define TOTAL 1000
+static int index = 0;
+uint64_t data[TOTAL];
+uint64_t length[TOTAL];
 
 bool mempool_init(Pool_t *pool) {
     if (!pool)
@@ -38,6 +51,7 @@ bool mempool_init(Pool_t *pool) {
 // Success: return memory address
 // Fail: return NULL
 void *mempool_alloc(Pool_t *pool, uint32_t size) {
+    uint64_t x0 = rdtsc();
     if (!pool || size == 0)
         return NULL;
 
@@ -71,6 +85,9 @@ void *mempool_alloc(Pool_t *pool, uint32_t size) {
     block_alloc->next = NULL;
     block_info->num_using++;
     mem = (uint8_t *)(block_alloc + 1);
+    data[index] = rdtsc() - x0;
+    length[index] = size;
+    index++;
     return mem;
 }
 
@@ -103,6 +120,9 @@ void mempool_destroy(Pool_t *pool) {
         return;
 
     free(pool->start);
+    for (int i = 0; i < index; i++) {
+        printf("%ld %ld\n", length[i], data[i]);
+    }
 }
 
 // Find the index of the corresponding block size to be allocated
