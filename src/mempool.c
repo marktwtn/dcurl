@@ -2,6 +2,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 
 uint32_t block_sizes[MAX_BLOCK_INFO_ENTRY] = {
     BLOCK_SIZE_0,
@@ -51,7 +52,9 @@ bool mempool_init(Pool_t *pool) {
 // Success: return memory address
 // Fail: return NULL
 void *mempool_alloc(Pool_t *pool, uint32_t size) {
-    uint64_t x0 = rdtsc();
+    //uint64_t x0 = rdtsc();
+    struct timespec ts, te;
+    clock_gettime(CLOCK_MONOTONIC, &ts);
     if (!pool || size == 0)
         return NULL;
 
@@ -85,7 +88,9 @@ void *mempool_alloc(Pool_t *pool, uint32_t size) {
     block_alloc->next = NULL;
     block_info->num_using++;
     mem = (uint8_t *)(block_alloc + 1);
-    data[index] = rdtsc() - x0;
+    clock_gettime(CLOCK_MONOTONIC, &te);
+    //data[index] = rdtsc() - x0;
+    data[index] = (te.tv_sec - ts.tv_sec) * 1000000000 + (te.tv_nsec - ts.tv_nsec);
     length[index] = size;
     index++;
     return mem;
