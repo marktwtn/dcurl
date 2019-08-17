@@ -110,6 +110,7 @@ fail_to_inittrytes:
 
 static bool Remote_doPoW(RemoteImplContext *remote_ctx, void *pow_ctx)
 {
+    struct timespec start, end;
     char buf[4];
     char messagebody[TRANSACTION_TRYTES_LENGTH + 4];
 
@@ -126,6 +127,8 @@ static bool Remote_doPoW(RemoteImplContext *remote_ctx, void *pow_ctx)
                                 &reply_to_queue))
         goto fail;
 
+    // near remote start
+    clock_gettime(CLOCK_REALTIME, &start);
     if (!publish_message_with_reply_to(&remote_ctx->conn[ctx->indexOfContext],
                                        1, "incoming_queue", reply_to_queue,
                                        messagebody))
@@ -135,6 +138,12 @@ static bool Remote_doPoW(RemoteImplContext *remote_ctx, void *pow_ctx)
                                reply_to_queue, (char *) (ctx->output_trytes),
                                TRANSACTION_TRYTES_LENGTH))
         goto fail;
+    // near remote end
+    clock_gettime(CLOCK_REALTIME, &end);
+    printf("bundleHash %.*s ", BundleTrinarySize       / 3, (char *)ctx->input_trytes + (BundleTrinaryOffset / 3));
+    printf("currentIdx %.*s ", CurrentIndexTrinarySize / 3, (char *)ctx->input_trytes + (CurrentIndexTrinaryOffset / 3));
+    printf("time %u\n", diff_in_nanosecond(start, end));
+    fflush(stdout);
 
     amqp_bytes_free(reply_to_queue);
 

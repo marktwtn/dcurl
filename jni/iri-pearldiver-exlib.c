@@ -12,6 +12,9 @@
 #include "../src/dcurl.h"
 #include "../src/trinary.h"
 
+#include "../src/common.h"
+#include "../src/constants.h"
+
 JNIEXPORT jboolean JNICALL
 Java_com_iota_iri_crypto_PearlDiver_exlibInit(JNIEnv *env, jclass clazz)
 {
@@ -29,6 +32,9 @@ Java_com_iota_iri_crypto_PearlDiver_exlibSearch(JNIEnv *env,
 {
     jboolean ret = JNI_TRUE;
 
+    struct timespec start, end;
+    clock_gettime(CLOCK_REALTIME, &start);
+    // dcurl start
     /*********** Get the Byte array from Java byte Array *************/
     jbyte *c_trits = (*env)->GetByteArrayElements(env, trits, NULL);
 
@@ -51,6 +57,12 @@ Java_com_iota_iri_crypto_PearlDiver_exlibSearch(JNIEnv *env,
     }
     (*env)->SetByteArrayRegion(env, trits, 0, 8019, ret_trits->data);
     /****************************************************************/
+    // dcurl end
+    clock_gettime(CLOCK_REALTIME, &end);
+    printf("bundleHash %.*s ", BundleTrinarySize       / 3, (char *)arg_trytes->data + (BundleTrinaryOffset / 3));
+    printf("currentIdx %.*s ", CurrentIndexTrinarySize / 3, (char *)arg_trytes->data + (CurrentIndexTrinaryOffset / 3));
+    printf("time %u\n", diff_in_nanosecond(start, end));
+    fflush(stdout);
 
 fail_output:
     free(result);

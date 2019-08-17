@@ -19,6 +19,7 @@
 #define __DCURL_PATCH__ 0
 
 double diff_in_second(struct timespec t1, struct timespec t2);
+uint32_t diff_in_nanosecond(struct timespec t1, struct timespec t2);
 
 /* Copy from logger project:
  * https://bitbucket.org/embear/logger/src/abef6b0a6c991545a3d3fecfbc39d2b0448fb85a/include/logger.h#lines-199*/

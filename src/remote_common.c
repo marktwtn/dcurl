@@ -12,6 +12,8 @@
 #include <sys/time.h>
 #include "common.h"
 
+struct timespec start, end;
+
 bool die_on_amqp_error(amqp_rpc_reply_t x, char const *context)
 {
     switch (x.reply_type) {
@@ -315,6 +317,8 @@ bool publish_message_with_reply_to(amqp_connection_state_t *conn,
     props.delivery_mode = AMQP_DELIVERY_PERSISTENT;
     props.reply_to = amqp_bytes_malloc_dup(reply_to_queue);
 
+    // remote start
+    //clock_gettime(CLOCK_REALTIME, &start);
     if (!die_on_error(amqp_basic_publish(*conn, channel, amqp_cstring_bytes(""),
                                          amqp_cstring_bytes(queue_name), 0, 0,
                                          &props, amqp_cstring_bytes(message)),

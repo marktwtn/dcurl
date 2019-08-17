@@ -42,6 +42,8 @@ int main(int argc, char *const *argv)
         }
     }
 
+    struct timespec start, end;
+
     dcurl_init();
 
     if (!connect_broker(&conn, hostIP))
@@ -54,6 +56,8 @@ int main(int argc, char *const *argv)
         if (!consume_message(&conn, 1, &envelope))
             goto fail;
 
+        // FPGA start
+        clock_gettime(CLOCK_REALTIME, &start);
         log_debug(
             0,
             MSG_PREFIX
@@ -92,6 +96,12 @@ int main(int argc, char *const *argv)
                 &conn, 1, (char *) envelope.message.properties.reply_to.bytes,
                 (char *) ret_trytes))
             goto fail;
+        // FPGA end
+        clock_gettime(CLOCK_REALTIME, &end);
+        printf("bundleHash %.*s ", BundleTrinarySize       / 3, (char *)trytes + (BundleTrinaryOffset / 3));
+        printf("currentIdx %.*s ", CurrentIndexTrinarySize / 3, (char *)trytes + (CurrentIndexTrinaryOffset / 3));
+        printf("time %u\n", diff_in_nanosecond(start, end));
+        fflush(stdout);
 
         free(ret_trytes);
         amqp_destroy_envelope(&envelope);

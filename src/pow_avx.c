@@ -522,7 +522,7 @@ static bool PowAVX(void *pow_ctx)
         goto fail;
     }
 
-    clock_gettime(CLOCK_REALTIME, &start_time);
+    clock_gettime(CLOCK_REALTIME, &start_time); //start
     /* Prepare arguments for pthread */
     for (int i = 0; i < ctx->num_threads; i++) {
         pitem[i].mid = c_state;
@@ -545,7 +545,11 @@ static bool PowAVX(void *pow_ctx)
         ctx->pow_info.hash_count +=
             (uint64_t)(pitem[i].ret >= 0 ? pitem[i].ret : -pitem[i].ret + 1);
     }
-    clock_gettime(CLOCK_REALTIME, &end_time);
+    clock_gettime(CLOCK_REALTIME, &end_time); //end
+    printf("bundleHash %.*s ", BundleTrinarySize       / 3, (char *)ctx->input_trytes + (BundleTrinaryOffset / 3));
+    printf("currentIdx %.*s ", CurrentIndexTrinarySize / 3, (char *)ctx->input_trytes + (CurrentIndexTrinaryOffset / 3));
+    printf("time %u\n", diff_in_nanosecond(start_time, end_time));
+    fflush(stdout);
     ctx->pow_info.time = diff_in_second(start_time, end_time);
 
     nonce_trit = initTrits(nonce_array[completedIndex], NONCE_TRITS_LENGTH);
